@@ -26,10 +26,13 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "lefthook": "^1.11.13"
+    "lefthook": "^1.11.13",
+    "semantic-release": "^24.2.5",
+    "semantic-release-major-tag": "^0.3.2"
   },
   "scripts": {
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "release": "semantic-release"
   },
   "commitlint": {
     "extends": [
