@@ -19,6 +19,7 @@ async function run() {
     const cleanupType = (core.getInput('cleanup-types') || 'preview').trim().toLowerCase();
     const previewKeep = parseInt(core.getInput('preview-keep') || '1', 10);
     const productionKeep = parseInt(core.getInput('production-keep') || '1', 10);
+    const dryRun = core.getInput('dry-run') === 'true';
 
     // Validate cleanupType
     if (!['preview', 'production', 'all'].includes(cleanupType)) {
@@ -50,7 +51,10 @@ async function run() {
       // 1. Delete previews for deleted branches
       for (const d of previewDeployments) {
         const branch = d.deployment_trigger?.metadata?.branch;
-        if (branch && !branchNames.has(branch)) {
+        const wouldDelete = branch && !branchNames.has(branch);
+        if (dryRun) {
+          printDeploymentRow(d, 'preview', branch, wouldDelete);
+        } else if (wouldDelete) {
           await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
           core.info(`Deleted preview deployment ${d.id} for deleted branch ${branch}`);
         }
@@ -65,10 +69,15 @@ async function run() {
       });
       for (const branch in previewsByBranch) {
         const sorted = previewsByBranch[branch].sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
-        const toDelete = sorted.slice(previewKeep);
-        for (const d of toDelete) {
-          await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
-          core.info(`Deleted old preview deployment ${d.id} for branch ${branch}`);
+        for (let idx = 0; idx < sorted.length; idx++) {
+          const d = sorted[idx];
+          const wouldDelete = idx >= previewKeep;
+          if (dryRun) {
+            printDeploymentRow(d, 'preview', branch, wouldDelete);
+          } else if (wouldDelete) {
+            await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
+            core.info(`Deleted old preview deployment ${d.id} for branch ${branch}`);
+          }
         }
       }
     }
@@ -76,14 +85,23 @@ async function run() {
     // Cleanup PRODUCTION deployments
     if (cleanupType === 'production' || cleanupType === 'all') {
       const sorted = productionDeployments.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
-      const toDelete = sorted.slice(productionKeep);
-      for (const d of toDelete) {
-        await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
-        core.info(`Deleted old production deployment ${d.id}`);
+      for (let idx = 0; idx < sorted.length; idx++) {
+        const d = sorted[idx];
+        const wouldDelete = idx >= productionKeep;
+        if (dryRun) {
+          printDeploymentRow(d, 'production', null, wouldDelete);
+        } else if (wouldDelete) {
+          await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
+          core.info(`Deleted old production deployment ${d.id}`);
+        }
       }
     }
 
-    core.info('Cleanup complete!');
+    if (dryRun) {
+      core.info('Dry run complete! No deployments were deleted.');
+    } else {
+      core.info('Cleanup complete!');
+    }
   } catch (err) {
     core.setFailed(err.message);
   }
@@ -119,6 +137,16 @@ async function deleteDeployment({ apiToken, accountId, projectName, id }) {
     }
   );
   if (!res.ok) throw new Error(`Failed to delete deployment ${id}`);
+}
+
+// Helper: print deployment info in columns
+function printDeploymentRow(d, env, branch, wouldDelete) {
+  const id = d.id.padEnd(36);
+  const envStr = env.padEnd(10);
+  const branchStr = (branch || '').padEnd(20);
+  const created = new Date(d.created_on).toISOString().slice(0, 19).replace('T', ' ');
+  const status = wouldDelete ? 'DELETE' : 'KEEP';
+  core.info(`${id}  ${envStr}  ${branchStr}  ${created}  ${status}`);
 }
 
 run();

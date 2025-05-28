@@ -31,7 +31,10 @@ inputs:
     required: false
     description: Number of production deployments to keep
     default: '1'
+  dry-run:
+    required: false
+    description: 'If true, only list deployments and whether they would be deleted.'
+    default: 'false'
 runs:
   using: node20
   main: src/index.mjs
-  
