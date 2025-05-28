@@ -23,6 +23,7 @@
     "node": ">= 20.0.0",
     "npm": ">= 10.0.0"
   },
+  "type": "module",
   "devDependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
@@ -35,7 +36,7 @@
     "semantic-release-major-tag": "^0.3.2"
   },
   "scripts": {
-    "build": "esbuild src/index.mjs --bundle --platform=node --target=node20 --outfile=dist/index.js",
+    "build": "esbuild src/index.mjs --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.mjs",
     "prepare": "lefthook install",
     "release": "semantic-release"
   },
