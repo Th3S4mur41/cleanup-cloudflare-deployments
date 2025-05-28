@@ -1,0 +1,37 @@
+name: Cleanup Cloudflare Deployments
+description: Delete old Cloudflare deployments according to settings.
+author: Th3S4mur41
+
+branding:
+  icon: 'trash-2'
+  color: 'orange'
+
+inputs:
+  cloudflare-api-token:
+    required: true
+    description: Cloudflare API Token
+  cloudflare-account-id:
+    required: true
+    description: Cloudflare Account ID
+  cloudflare-project-name:
+    required: true
+    description: Cloudflare Project Name
+  github-token:
+    required: false
+    description: GitHub Token. Defaults to secrets.GITHUB_TOKEN if not provided.
+  cleanup-types:
+    required: false
+    description: 'Which deployment types to clean up: "preview", "production", or "all".'
+    default: preview
+  preview-keep:
+    required: false
+    description: Number of preview deployments to keep per branch
+    default: '1'
+  production-keep:
+    required: false
+    description: Number of production deployments to keep
+    default: '1'
+runs:
+  using: node20
+  main: src/index.mjs
+  
