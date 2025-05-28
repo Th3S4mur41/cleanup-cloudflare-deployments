@@ -36,7 +36,7 @@
     "semantic-release-major-tag": "^0.3.2"
   },
   "scripts": {
-    "build": "esbuild src/index.mjs --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.mjs",
+    "build": "esbuild src/index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.cjs",
     "prepare": "lefthook install",
     "release": "semantic-release"
   },
