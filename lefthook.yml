@@ -1,0 +1,6 @@
+pre-commit:
+  parallel: true
+commit-msg:
+  commands:
+    commitlint:
+      run: npx commitlint --edit $1

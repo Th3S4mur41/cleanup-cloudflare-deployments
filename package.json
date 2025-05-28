@@ -1,38 +1,56 @@
 {
   "name": "cleanup-cloudflare-deployments",
-	"description": "Delete old Cloudflare deployments according to settings.",
-	"keywords": [
-		"Actions",
-		"GitHub",
-		"Cloudflare",
-		"Cleanup",
-		"Deployments",
+  "description": "Delete old Cloudflare deployments according to settings.",
+  "keywords": [
+    "Actions",
+    "GitHub",
+    "Cloudflare",
+    "Cleanup",
+    "Deployments",
     "Pages",
     "Delete",
     "Remove",
     "Purge"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments.git"
-	},
-	"bugs": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments/issues",
-	"license": "MIT",
-	"private": "true",
-	"engines": {
-		"node": ">= 20.0.0",
-		"npm": ">= 10.0.0"
-	},
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments.git"
+  },
+  "bugs": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments/issues",
+  "license": "MIT",
+  "private": "true",
+  "engines": {
+    "node": ">= 20.0.0",
+    "npm": ">= 10.0.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1"
+    "@commitlint/config-conventional": "^19.8.1",
+    "lefthook": "^1.11.13"
+  },
+  "scripts": {
+    "prepare": "lefthook install"
   },
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"],
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
     "rules": {
-      "body-max-line-length": [1, "always", 140],
-      "footer-max-line-length": [2, "always", 140],
-      "header-max-length": [2, "always", 140]
+      "body-max-line-length": [
+        1,
+        "always",
+        140
+      ],
+      "footer-max-line-length": [
+        2,
+        "always",
+        140
+      ],
+      "header-max-length": [
+        2,
+        "always",
+        140
+      ]
     }
   }
 }
