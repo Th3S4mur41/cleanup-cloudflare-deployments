@@ -1,5 +1,8 @@
 pre-commit:
   parallel: true
+  commands:
+    build:
+      run: npm run build
 commit-msg:
   commands:
     commitlint:
