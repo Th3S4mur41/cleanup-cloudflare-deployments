@@ -116,7 +116,10 @@ async function fetchAllDeployments({ apiToken, accountId, projectName }) {
       }
     );
     const data = await res.json();
-    if (!data.success) throw new Error('Failed to fetch Cloudflare deployments');
+    if (!data.success) {
+      core.error(`Cloudflare API error: ${JSON.stringify(data.errors)}`);
+      throw new Error('Failed to fetch Cloudflare deployments');
+    }
     deployments = deployments.concat(data.result);
     if (data.result.length < 100) break;
     page++;
