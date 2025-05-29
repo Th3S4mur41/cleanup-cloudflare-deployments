@@ -30221,8 +30221,8 @@ var import_fs = __toESM(require("fs"), 1);
 async function run() {
   try {
     const apiToken = core.getInput("cloudflare-api-token");
-    const accountId = core.getInput("cloudflare-account-id");
-    const projectName = core.getInput("cloudflare-project-name");
+    const accountId2 = core.getInput("cloudflare-account-id");
+    const projectName2 = core.getInput("cloudflare-project-name");
     let githubToken = core.getInput("github-token") || process.env.GITHUB_TOKEN;
     if (!githubToken) {
       core.setFailed("No GitHub token provided and secrets.GITHUB_TOKEN is missing from environment.");
@@ -30244,7 +30244,7 @@ async function run() {
       per_page: 100
     });
     const branchNames = new Set(branches.map((b) => b.name));
-    const deployments = await fetchAllDeployments({ apiToken, accountId, projectName });
+    const deployments = await fetchAllDeployments({ apiToken, accountId: accountId2, projectName: projectName2 });
     const previewDeployments = deployments.filter((d) => d.environment === "preview");
     const productionDeployments = deployments.filter((d) => d.environment === "production");
     let deletedPreviewCount = 0;
@@ -30259,7 +30259,7 @@ async function run() {
           if (!wouldDelete) keptDeployments.push({ d, env: "preview", branch });
         } else if (wouldDelete) {
           try {
-            await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
+            await deleteDeployment({ apiToken, accountId: accountId2, projectName: projectName2, id: d.id });
             printDeploymentRow(d, "preview", branch, "DELETED");
             deletedPreviewCount++;
           } catch (err) {
@@ -30288,7 +30288,7 @@ async function run() {
             if (!wouldDelete) keptDeployments.push({ d, env: "preview", branch });
           } else if (wouldDelete) {
             try {
-              await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
+              await deleteDeployment({ apiToken, accountId: accountId2, projectName: projectName2, id: d.id });
               printDeploymentRow(d, "preview", branch, "DELETED");
               deletedPreviewCount++;
             } catch (err) {
@@ -30312,7 +30312,7 @@ async function run() {
           if (!wouldDelete) keptDeployments.push({ d, env: "production", branch: null });
         } else if (wouldDelete) {
           try {
-            await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
+            await deleteDeployment({ apiToken, accountId: accountId2, projectName: projectName2, id: d.id });
             printDeploymentRow(d, "production", null, "DELETED");
             deletedProductionCount++;
           } catch (err) {
@@ -30335,12 +30335,12 @@ async function run() {
     core.setFailed(err.message);
   }
 }
-async function fetchAllDeployments({ apiToken, accountId, projectName }) {
+async function fetchAllDeployments({ apiToken, accountId: accountId2, projectName: projectName2 }) {
   let deployments = [];
   let page = 1;
   while (true) {
     const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments?page=${page}`,
+      `https://api.cloudflare.com/client/v4/accounts/${accountId2}/pages/projects/${projectName2}/deployments?page=${page}`,
       {
         headers: { Authorization: `Bearer ${apiToken}` }
       }
@@ -30356,9 +30356,9 @@ async function fetchAllDeployments({ apiToken, accountId, projectName }) {
   }
   return deployments;
 }
-async function deleteDeployment({ apiToken, accountId, projectName, id }) {
+async function deleteDeployment({ apiToken, accountId: accountId2, projectName: projectName2, id }) {
   const res = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments/${id}`,
+    `https://api.cloudflare.com/client/v4/accounts/${accountId2}/pages/projects/${projectName2}/deployments/${id}`,
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${apiToken}` }
@@ -30374,8 +30374,11 @@ function printDeploymentRow(d, env, branch, status) {
     branchStr = d.deployment_trigger.metadata.branch;
   }
   branchStr = (branchStr || "").padEnd(20);
+  let sha = d.deployment_trigger?.metadata?.commit_hash || "";
+  let shaShort = sha ? sha.substring(0, 7) : "";
+  const shaStr = shaShort.padEnd(10);
   const created = new Date(d.created_on).toISOString().slice(0, 19).replace("T", " ");
-  core.info(`${id}  ${envStr}  ${branchStr}  ${created}  ${status}`);
+  core.info(`${id}  ${envStr}  ${branchStr}  ${shaStr}  ${created}  ${status}`);
 }
 async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments }) {
   let summary = "";
@@ -30389,16 +30392,23 @@ async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCoun
   }
   if (keptDeployments.length > 0) {
     summary += "\n### Kept Deployments\n";
-    summary += "| ID | Environment | Branch | Created | Status |\n";
-    summary += "| --- | --- | --- | --- | --- |\n";
+    summary += "| ID | Environment | Branch | Commit | Created | Status |\n";
+    summary += "| --- | --- | --- | --- | --- | --- |\n";
+    const owner = process.env.GITHUB_REPOSITORY?.split("/")[0] || "";
+    const repo = process.env.GITHUB_REPOSITORY?.split("/")[1] || "";
     for (const { d, env, branch } of keptDeployments) {
       let branchStr = branch;
       if (!branchStr && d.deployment_trigger?.metadata?.branch) {
         branchStr = d.deployment_trigger.metadata.branch;
       }
+      let sha = d.deployment_trigger?.metadata?.commit_hash || "";
+      let shaShort = sha ? sha.substring(0, 7) : "";
+      let shaLink = sha && owner && repo ? `[${shaShort}](https://github.com/${owner}/${repo}/commit/${sha})` : shaShort;
       const id = d.id;
+      const cfLink = `https://dash.cloudflare.com/${accountId}/pages/view/${projectName}/${id}`;
+      const idLink = `[${id}](${cfLink})`;
       const created = new Date(d.created_on).toISOString().slice(0, 19).replace("T", " ");
-      summary += `| ${id} | ${env} | ${branchStr || ""} | ${created} | KEEP |
+      summary += `| ${idLink} | ${env} | ${branchStr || ""} | ${shaLink} | ${created} | KEEP |
 `;
     }
   }

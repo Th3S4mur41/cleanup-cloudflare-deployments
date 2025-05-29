@@ -189,11 +189,14 @@ function printDeploymentRow(d, env, branch, status) {
     branchStr = d.deployment_trigger.metadata.branch;
   }
   branchStr = (branchStr || '').padEnd(20);
+  // Get commit sha (short)
+  let sha = d.deployment_trigger?.metadata?.commit_hash || '';
+  let shaShort = sha ? sha.substring(0, 7) : '';
+  const shaStr = shaShort.padEnd(10);
   const created = new Date(d.created_on).toISOString().slice(0, 19).replace('T', ' ');
-  core.info(`${id}  ${envStr}  ${branchStr}  ${created}  ${status}`);
+  core.info(`${id}  ${envStr}  ${branchStr}  ${shaStr}  ${created}  ${status}`);
 }
 
-// Helper: write workflow summary
 async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments }) {
   let summary = '';
   if (deletedProductionCount > 0) {
@@ -204,16 +207,27 @@ async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCoun
   }
   if (keptDeployments.length > 0) {
     summary += '\n### Kept Deployments\n';
-    summary += '| ID | Environment | Branch | Created | Status |\n';
-    summary += '| --- | --- | --- | --- | --- |\n';
+    summary += '| ID | Environment | Branch | Commit | Created | Status |\n';
+    summary += '| --- | --- | --- | --- | --- | --- |\n';
+    // Get repo info for commit links
+    const owner = process.env.GITHUB_REPOSITORY?.split('/')[0] || '';
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || '';
     for (const { d, env, branch } of keptDeployments) {
       let branchStr = branch;
       if (!branchStr && d.deployment_trigger?.metadata?.branch) {
         branchStr = d.deployment_trigger.metadata.branch;
       }
+      let sha = d.deployment_trigger?.metadata?.commit_hash || '';
+      let shaShort = sha ? sha.substring(0, 7) : '';
+      let shaLink = sha && owner && repo
+        ? `[${shaShort}](https://github.com/${owner}/${repo}/commit/${sha})`
+        : shaShort;
       const id = d.id;
+      // Cloudflare deployment details link
+      const cfLink = `https://dash.cloudflare.com/${accountId}/pages/view/${projectName}/${id}`;
+      const idLink = `[${id}](${cfLink})`;
       const created = new Date(d.created_on).toISOString().slice(0, 19).replace('T', ' ');
-      summary += `| ${id} | ${env} | ${branchStr || ''} | ${created} | KEEP |\n`;
+      summary += `| ${idLink} | ${env} | ${branchStr || ''} | ${shaLink} | ${created} | KEEP |\n`;
     }
   }
   // Write to GitHub Actions summary if available
