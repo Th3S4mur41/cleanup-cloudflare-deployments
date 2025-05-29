@@ -30221,8 +30221,8 @@ var import_fs = __toESM(require("fs"), 1);
 async function run() {
   try {
     const apiToken = core.getInput("cloudflare-api-token");
-    const accountId2 = core.getInput("cloudflare-account-id");
-    const projectName2 = core.getInput("cloudflare-project-name");
+    const accountId = core.getInput("cloudflare-account-id");
+    const projectName = core.getInput("cloudflare-project-name");
     let githubToken = core.getInput("github-token") || process.env.GITHUB_TOKEN;
     if (!githubToken) {
       core.setFailed("No GitHub token provided and secrets.GITHUB_TOKEN is missing from environment.");
@@ -30244,7 +30244,7 @@ async function run() {
       per_page: 100
     });
     const branchNames = new Set(branches.map((b) => b.name));
-    const deployments = await fetchAllDeployments({ apiToken, accountId: accountId2, projectName: projectName2 });
+    const deployments = await fetchAllDeployments({ apiToken, accountId, projectName });
     const previewDeployments = deployments.filter((d) => d.environment === "preview");
     const productionDeployments = deployments.filter((d) => d.environment === "production");
     let deletedPreviewCount = 0;
@@ -30259,7 +30259,7 @@ async function run() {
           if (!wouldDelete) keptDeployments.push({ d, env: "preview", branch });
         } else if (wouldDelete) {
           try {
-            await deleteDeployment({ apiToken, accountId: accountId2, projectName: projectName2, id: d.id });
+            await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
             printDeploymentRow(d, "preview", branch, "DELETED");
             deletedPreviewCount++;
           } catch (err) {
@@ -30288,7 +30288,7 @@ async function run() {
             if (!wouldDelete) keptDeployments.push({ d, env: "preview", branch });
           } else if (wouldDelete) {
             try {
-              await deleteDeployment({ apiToken, accountId: accountId2, projectName: projectName2, id: d.id });
+              await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
               printDeploymentRow(d, "preview", branch, "DELETED");
               deletedPreviewCount++;
             } catch (err) {
@@ -30312,7 +30312,7 @@ async function run() {
           if (!wouldDelete) keptDeployments.push({ d, env: "production", branch: null });
         } else if (wouldDelete) {
           try {
-            await deleteDeployment({ apiToken, accountId: accountId2, projectName: projectName2, id: d.id });
+            await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
             printDeploymentRow(d, "production", null, "DELETED");
             deletedProductionCount++;
           } catch (err) {
@@ -30330,17 +30330,17 @@ async function run() {
     } else {
       core.info("Cleanup complete!");
     }
-    await writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments });
+    await writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments, accountId, projectName });
   } catch (err) {
     core.setFailed(err.message);
   }
 }
-async function fetchAllDeployments({ apiToken, accountId: accountId2, projectName: projectName2 }) {
+async function fetchAllDeployments({ apiToken, accountId, projectName }) {
   let deployments = [];
   let page = 1;
   while (true) {
     const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId2}/pages/projects/${projectName2}/deployments?page=${page}`,
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments?page=${page}`,
       {
         headers: { Authorization: `Bearer ${apiToken}` }
       }
@@ -30356,9 +30356,9 @@ async function fetchAllDeployments({ apiToken, accountId: accountId2, projectNam
   }
   return deployments;
 }
-async function deleteDeployment({ apiToken, accountId: accountId2, projectName: projectName2, id }) {
+async function deleteDeployment({ apiToken, accountId, projectName, id }) {
   const res = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${accountId2}/pages/projects/${projectName2}/deployments/${id}`,
+    `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments/${id}`,
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${apiToken}` }
@@ -30380,7 +30380,7 @@ function printDeploymentRow(d, env, branch, status) {
   const created = new Date(d.created_on).toISOString().slice(0, 19).replace("T", " ");
   core.info(`${id}  ${envStr}  ${branchStr}  ${shaStr}  ${created}  ${status}`);
 }
-async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments }) {
+async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments, accountId, projectName }) {
   let summary = "";
   if (deletedProductionCount > 0) {
     summary += `- Deleted **${deletedProductionCount}** production deployment(s)

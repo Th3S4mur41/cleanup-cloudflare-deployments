@@ -138,7 +138,7 @@ async function run() {
     }
 
     // Write workflow summary
-    await writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments });
+    await writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments, accountId, projectName });
   } catch (err) {
     core.setFailed(err.message);
   }
@@ -197,7 +197,7 @@ function printDeploymentRow(d, env, branch, status) {
   core.info(`${id}  ${envStr}  ${branchStr}  ${shaStr}  ${created}  ${status}`);
 }
 
-async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments }) {
+async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments, accountId, projectName }) {
   let summary = '';
   if (deletedProductionCount > 0) {
     summary += `- Deleted **${deletedProductionCount}** production deployment(s)\n`;
