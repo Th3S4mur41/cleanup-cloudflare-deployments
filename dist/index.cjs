@@ -30305,7 +30305,7 @@ async function fetchAllDeployments({ apiToken, accountId, projectName }) {
   let page = 1;
   while (true) {
     const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments?page=${page}&per_page=100`,
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments?page=${page}`,
       {
         headers: { Authorization: `Bearer ${apiToken}` }
       }
@@ -30316,7 +30316,7 @@ async function fetchAllDeployments({ apiToken, accountId, projectName }) {
       throw new Error("Failed to fetch Cloudflare deployments");
     }
     deployments = deployments.concat(data.result);
-    if (data.result.length < 100) break;
+    if (data.result.length < 25) break;
     page++;
   }
   return deployments;
