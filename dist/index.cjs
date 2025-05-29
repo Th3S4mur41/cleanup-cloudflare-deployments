@@ -30369,7 +30369,11 @@ async function deleteDeployment({ apiToken, accountId, projectName, id }) {
 function printDeploymentRow(d, env, branch, status) {
   const id = d.id.padEnd(36);
   const envStr = env.padEnd(10);
-  const branchStr = (branch || "").padEnd(20);
+  let branchStr = branch;
+  if (!branchStr && d.deployment_trigger?.metadata?.branch) {
+    branchStr = d.deployment_trigger.metadata.branch;
+  }
+  branchStr = (branchStr || "").padEnd(20);
   const created = new Date(d.created_on).toISOString().slice(0, 19).replace("T", " ");
   core.info(`${id}  ${envStr}  ${branchStr}  ${created}  ${status}`);
 }
@@ -30388,9 +30392,13 @@ async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCoun
     summary += "| ID | Environment | Branch | Created | Status |\n";
     summary += "| --- | --- | --- | --- | --- |\n";
     for (const { d, env, branch } of keptDeployments) {
+      let branchStr = branch;
+      if (!branchStr && d.deployment_trigger?.metadata?.branch) {
+        branchStr = d.deployment_trigger.metadata.branch;
+      }
       const id = d.id;
       const created = new Date(d.created_on).toISOString().slice(0, 19).replace("T", " ");
-      summary += `| ${id} | ${env} | ${branch || ""} | ${created} | KEEP |
+      summary += `| ${id} | ${env} | ${branchStr || ""} | ${created} | KEEP |
 `;
     }
   }
