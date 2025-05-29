@@ -50,10 +50,17 @@ async function run() {
         const branch = d.deployment_trigger?.metadata?.branch;
         const wouldDelete = branch && !branchNames.has(branch);
         if (dryRun) {
-          printDeploymentRow(d, 'preview', branch, wouldDelete);
+          printDeploymentRow(d, 'preview', branch, wouldDelete ? 'DELETE' : 'KEEP');
         } else if (wouldDelete) {
-          await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
-          core.info(`Deleted preview deployment ${d.id} for deleted branch ${branch}`);
+          try {
+            await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
+            printDeploymentRow(d, 'preview', branch, 'DELETED');
+          } catch (err) {
+            printDeploymentRow(d, 'preview', branch, 'ERROR');
+            core.error(`Failed to delete deployment ${d.id}: ${err.message}`);
+          }
+        } else {
+          printDeploymentRow(d, 'preview', branch, 'KEEP');
         }
       }
       // 2. For existing branches, keep only the N most recent
@@ -70,10 +77,17 @@ async function run() {
           const d = sorted[idx];
           const wouldDelete = idx >= previewKeep;
           if (dryRun) {
-            printDeploymentRow(d, 'preview', branch, wouldDelete);
+            printDeploymentRow(d, 'preview', branch, wouldDelete ? 'DELETE' : 'KEEP');
           } else if (wouldDelete) {
-            await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
-            core.info(`Deleted old preview deployment ${d.id} for branch ${branch}`);
+            try {
+              await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
+              printDeploymentRow(d, 'preview', branch, 'DELETED');
+            } catch (err) {
+              printDeploymentRow(d, 'preview', branch, 'ERROR');
+              core.error(`Failed to delete deployment ${d.id}: ${err.message}`);
+            }
+          } else {
+            printDeploymentRow(d, 'preview', branch, 'KEEP');
           }
         }
       }
@@ -86,10 +100,17 @@ async function run() {
         const d = sorted[idx];
         const wouldDelete = idx >= productionKeep;
         if (dryRun) {
-          printDeploymentRow(d, 'production', null, wouldDelete);
+          printDeploymentRow(d, 'production', null, wouldDelete ? 'DELETE' : 'KEEP');
         } else if (wouldDelete) {
-          await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
-          core.info(`Deleted old production deployment ${d.id}`);
+          try {
+            await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
+            printDeploymentRow(d, 'production', null, 'DELETED');
+          } catch (err) {
+            printDeploymentRow(d, 'production', null, 'ERROR');
+            core.error(`Failed to delete deployment ${d.id}: ${err.message}`);
+          }
+        } else {
+          printDeploymentRow(d, 'production', null, 'KEEP');
         }
       }
     }
@@ -140,12 +161,11 @@ async function deleteDeployment({ apiToken, accountId, projectName, id }) {
 }
 
 // Helper: print deployment info in columns
-function printDeploymentRow(d, env, branch, wouldDelete) {
+function printDeploymentRow(d, env, branch, status) {
   const id = d.id.padEnd(36);
   const envStr = env.padEnd(10);
   const branchStr = (branch || '').padEnd(20);
   const created = new Date(d.created_on).toISOString().slice(0, 19).replace('T', ' ');
-  const status = wouldDelete ? 'DELETE' : 'KEEP';
   core.info(`${id}  ${envStr}  ${branchStr}  ${created}  ${status}`);
 }
 
