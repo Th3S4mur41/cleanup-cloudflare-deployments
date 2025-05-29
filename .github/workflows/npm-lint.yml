@@ -1,0 +1,46 @@
+name: Lint and Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  push:
+    branches: [main, next, beta, alpha]
+
+concurrency:
+  group: ${{ github.workflow }}_${{ github.head_ref || github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-build:
+    name: '🕵️‍♂️ Lint and Build'
+    runs-on: ubuntu-latest
+
+    env: 
+      LEFTHOOK: 0
+
+    steps:
+      - name: '☁️ Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: '⚙️ Use Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          check-latest: true
+          cache: 'npm'
+
+      - name: '⛓️ Install dependencies'
+        run: npm ci --no-audit --prefer-offline --progress=false
+
+      - name: '✅ Lint code'
+        run: npm run lint -- --reporter=github
+
+      - name: '🛠️ Build'
+        run: npm run build --if-present
