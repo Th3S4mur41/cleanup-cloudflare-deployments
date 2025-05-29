@@ -28932,6 +28932,7 @@ var init_multipart_parser = __esm({
 });
 
 // src/index.mjs
+var import_node_fs2 = __toESM(require("node:fs"), 1);
 var core = __toESM(require_core(), 1);
 var github = __toESM(require_github(), 1);
 
@@ -30217,20 +30218,19 @@ function fixResponseChunkedTransferBadEnding(request, errorCallback) {
 }
 
 // src/index.mjs
-var import_fs = __toESM(require("fs"), 1);
 async function run() {
   try {
     const apiToken = core.getInput("cloudflare-api-token");
     const accountId = core.getInput("cloudflare-account-id");
     const projectName = core.getInput("cloudflare-project-name");
-    let githubToken = core.getInput("github-token") || process.env.GITHUB_TOKEN;
+    const githubToken = core.getInput("github-token") || process.env.GITHUB_TOKEN;
     if (!githubToken) {
       core.setFailed("No GitHub token provided and secrets.GITHUB_TOKEN is missing from environment.");
       return;
     }
     const cleanupType = (core.getInput("cleanup-types") || "preview").trim().toLowerCase();
-    const previewKeep = parseInt(core.getInput("preview-keep") || "1", 10);
-    const productionKeep = parseInt(core.getInput("production-keep") || "1", 10);
+    const previewKeep = Number.parseInt(core.getInput("preview-keep") || "1", 10);
+    const productionKeep = Number.parseInt(core.getInput("production-keep") || "1", 10);
     const dryRun = core.getInput("dry-run") === "true";
     if (!["preview", "production", "all"].includes(cleanupType)) {
       core.setFailed("cleanup-types must be one of: 'preview', 'production', or 'all'");
@@ -30249,7 +30249,7 @@ async function run() {
     const productionDeployments = deployments.filter((d) => d.environment === "production");
     let deletedPreviewCount = 0;
     let deletedProductionCount = 0;
-    let keptDeployments = [];
+    const keptDeployments = [];
     if (cleanupType === "preview" || cleanupType === "all") {
       for (const d of previewDeployments) {
         const branch = d.deployment_trigger?.metadata?.branch;
@@ -30330,7 +30330,13 @@ async function run() {
     } else {
       core.info("Cleanup complete!");
     }
-    await writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments, accountId, projectName });
+    await writeWorkflowSummary({
+      deletedPreviewCount,
+      deletedProductionCount,
+      keptDeployments,
+      accountId,
+      projectName
+    });
   } catch (err) {
     core.setFailed(err.message);
   }
@@ -30374,13 +30380,19 @@ function printDeploymentRow(d, env, branch, status) {
     branchStr = d.deployment_trigger.metadata.branch;
   }
   branchStr = (branchStr || "").padEnd(20);
-  let sha = d.deployment_trigger?.metadata?.commit_hash || "";
-  let shaShort = sha ? sha.substring(0, 7) : "";
+  const sha = d.deployment_trigger?.metadata?.commit_hash || "";
+  const shaShort = sha ? sha.substring(0, 7) : "";
   const shaStr = shaShort.padEnd(10);
   const created = new Date(d.created_on).toISOString().slice(0, 19).replace("T", " ");
   core.info(`${id}  ${envStr}  ${branchStr}  ${shaStr}  ${created}  ${status}`);
 }
-async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments, accountId, projectName }) {
+async function writeWorkflowSummary({
+  deletedPreviewCount,
+  deletedProductionCount,
+  keptDeployments,
+  accountId,
+  projectName
+}) {
   let summary = "";
   if (deletedProductionCount > 0) {
     summary += `- Deleted **${deletedProductionCount}** production deployment(s)
@@ -30401,9 +30413,9 @@ async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCoun
       if (!branchStr && d.deployment_trigger?.metadata?.branch) {
         branchStr = d.deployment_trigger.metadata.branch;
       }
-      let sha = d.deployment_trigger?.metadata?.commit_hash || "";
-      let shaShort = sha ? sha.substring(0, 7) : "";
-      let shaLink = sha && owner && repo ? `[${shaShort}](https://github.com/${owner}/${repo}/commit/${sha})` : shaShort;
+      const sha = d.deployment_trigger?.metadata?.commit_hash || "";
+      const shaShort = sha ? sha.substring(0, 7) : "";
+      const shaLink = sha && owner && repo ? `[${shaShort}](https://github.com/${owner}/${repo}/commit/${sha})` : shaShort;
       const id = d.id;
       const cfLink = `https://dash.cloudflare.com/${accountId}/pages/view/${projectName}/${id}`;
       const idLink = `[${id}](${cfLink})`;
@@ -30413,9 +30425,11 @@ async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCoun
     }
   }
   if (process.env.GITHUB_STEP_SUMMARY) {
-    import_fs.default.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+    import_node_fs2.default.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
   } else {
-    core.info("\n--- Workflow Summary ---\n" + summary);
+    core.info(`
+--- Workflow Summary ---
+ ${summary}`);
   }
 }
 run();

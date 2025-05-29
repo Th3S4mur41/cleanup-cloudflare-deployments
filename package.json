@@ -1,68 +1,44 @@
 {
-  "name": "cleanup-cloudflare-deployments",
-  "description": "Delete old Cloudflare deployments according to settings.",
-  "keywords": [
-    "Actions",
-    "GitHub",
-    "Cloudflare",
-    "Cleanup",
-    "Deployments",
-    "Pages",
-    "Delete",
-    "Remove",
-    "Purge"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments.git"
-  },
-  "bugs": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments/issues",
-  "license": "MIT",
-  "private": "true",
-  "engines": {
-    "node": ">= 20.0.0",
-    "npm": ">= 10.0.0"
-  },
-  "type": "module",
-  "devDependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/github": "^6.0.1",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@biomejs/biome": "^1.5.2",
-    "esbuild": "^0.25.5",
-    "lefthook": "^1.11.13",
-    "node-fetch": "^3.3.2",
-    "semantic-release": "^24.2.5",
-    "semantic-release-major-tag": "^0.3.2"
-  },
-  "scripts": {
-    "build": "esbuild src/index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.cjs",
-    "lint": "biome ci .",
-    "lint:fix": "biome check --write .",
-    "prepare": "lefthook install",
-    "release": "semantic-release"
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ],
-    "rules": {
-      "body-max-line-length": [
-        1,
-        "always",
-        140
-      ],
-      "footer-max-line-length": [
-        2,
-        "always",
-        140
-      ],
-      "header-max-length": [
-        2,
-        "always",
-        140
-      ]
-    }
-  }
+	"name": "cleanup-cloudflare-deployments",
+	"description": "Delete old Cloudflare deployments according to settings.",
+	"keywords": ["Actions", "GitHub", "Cloudflare", "Cleanup", "Deployments", "Pages", "Delete", "Remove", "Purge"],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments.git"
+	},
+	"bugs": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments/issues",
+	"license": "MIT",
+	"private": "true",
+	"engines": {
+		"node": ">= 20.0.0",
+		"npm": ">= 10.0.0"
+	},
+	"type": "module",
+	"devDependencies": {
+		"@actions/core": "^1.11.1",
+		"@actions/github": "^6.0.1",
+		"@biomejs/biome": "^1.9.4",
+		"@commitlint/cli": "^19.8.1",
+		"@commitlint/config-conventional": "^19.8.1",
+		"esbuild": "^0.25.5",
+		"lefthook": "^1.11.13",
+		"node-fetch": "^3.3.2",
+		"semantic-release": "^24.2.5",
+		"semantic-release-major-tag": "^0.3.2"
+	},
+	"scripts": {
+		"build": "esbuild src/index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.cjs",
+		"lint": "biome ci .",
+		"lint:fix": "biome check --write .",
+		"prepare": "lefthook install",
+		"release": "semantic-release"
+	},
+	"commitlint": {
+		"extends": ["@commitlint/config-conventional"],
+		"rules": {
+			"body-max-line-length": [1, "always", 140],
+			"footer-max-line-length": [2, "always", 140],
+			"header-max-length": [2, "always", 140]
+		}
+	}
 }
