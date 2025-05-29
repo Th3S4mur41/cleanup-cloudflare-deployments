@@ -29,6 +29,7 @@
     "@actions/github": "^6.0.1",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@biomejs/biome": "^1.5.2",
     "esbuild": "^0.25.5",
     "lefthook": "^1.11.13",
     "node-fetch": "^3.3.2",
@@ -37,6 +38,8 @@
   },
   "scripts": {
     "build": "esbuild src/index.mjs --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.cjs",
+    "lint": "biome ci .",
+    "lint:fix": "biome check --write .",
     "prepare": "lefthook install",
     "release": "semantic-release"
   },
