@@ -8,13 +8,10 @@ async function run() {
     const apiToken = core.getInput('cloudflare-api-token');
     const accountId = core.getInput('cloudflare-account-id');
     const projectName = core.getInput('cloudflare-project-name');
-    let githubToken = core.getInput('github-token');
+    let githubToken = core.getInput('github-token') || process.env.GITHUB_TOKEN || github.context.token;
     if (!githubToken) {
-      githubToken = github.token;
-      if (!githubToken) {
-        core.setFailed('No GitHub token provided and github.token is missing from context.');
-        return;
-      }
+      core.setFailed('No GitHub token provided and secrets.GITHUB_TOKEN is missing from environment.');
+      return;
     }
     const cleanupType = (core.getInput('cleanup-types') || 'preview').trim().toLowerCase();
     const previewKeep = parseInt(core.getInput('preview-keep') || '1', 10);
