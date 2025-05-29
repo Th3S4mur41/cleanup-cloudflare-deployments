@@ -3737,9 +3737,9 @@ var require_util2 = __commonJS({
       let policy = "";
       if (policyHeader.length > 0) {
         for (let i2 = policyHeader.length; i2 !== 0; i2--) {
-          const token = policyHeader[i2 - 1].trim();
-          if (referrerPolicyTokens.has(token)) {
-            policy = token;
+          const token2 = policyHeader[i2 - 1].trim();
+          if (referrerPolicyTokens.has(token2)) {
+            policy = token2;
             break;
           }
         }
@@ -3949,9 +3949,9 @@ var require_util2 = __commonJS({
     function parseMetadata(metadata) {
       const result = [];
       let empty = true;
-      for (const token of metadata.split(" ")) {
+      for (const token2 of metadata.split(" ")) {
         empty = false;
-        const parsedToken = parseHashWithOptions.exec(token);
+        const parsedToken = parseHashWithOptions.exec(token2);
         if (parsedToken === null || parsedToken.groups === void 0 || parsedToken.groups.algo === void 0) {
           continue;
         }
@@ -17965,8 +17965,8 @@ var require_auth = __commonJS({
     };
     exports2.BasicCredentialHandler = BasicCredentialHandler;
     var BearerCredentialHandler = class {
-      constructor(token) {
-        this.token = token;
+      constructor(token2) {
+        this.token = token2;
       }
       // currently implements pre-authorization
       // TODO: support preAuth = false where it hooks on 401
@@ -17988,8 +17988,8 @@ var require_auth = __commonJS({
     };
     exports2.BearerCredentialHandler = BearerCredentialHandler;
     var PersonalAccessTokenCredentialHandler = class {
-      constructor(token) {
-        this.token = token;
+      constructor(token2) {
+        this.token = token2;
       }
       // currently implements pre-authorization
       // TODO: support preAuth = false where it hooks on 401
@@ -18058,11 +18058,11 @@ var require_oidc_utils = __commonJS({
         return new http_client_1.HttpClient("actions/oidc-client", [new auth_1.BearerCredentialHandler(_OidcClient.getRequestToken())], requestOptions);
       }
       static getRequestToken() {
-        const token = process.env["ACTIONS_ID_TOKEN_REQUEST_TOKEN"];
-        if (!token) {
+        const token2 = process.env["ACTIONS_ID_TOKEN_REQUEST_TOKEN"];
+        if (!token2) {
           throw new Error("Unable to get ACTIONS_ID_TOKEN_REQUEST_TOKEN env variable");
         }
-        return token;
+        return token2;
       }
       static getIDTokenUrl() {
         const runtimeUrl = process.env["ACTIONS_ID_TOKEN_REQUEST_URL"];
@@ -19935,13 +19935,13 @@ var require_utils3 = __commonJS({
     exports2.getApiBaseUrl = exports2.getProxyFetch = exports2.getProxyAgentDispatcher = exports2.getProxyAgent = exports2.getAuthString = void 0;
     var httpClient = __importStar(require_lib());
     var undici_1 = require_undici();
-    function getAuthString(token, options) {
-      if (!token && !options.auth) {
+    function getAuthString(token2, options) {
+      if (!token2 && !options.auth) {
         throw new Error("Parameter token or opts.auth is required");
-      } else if (token && options.auth) {
+      } else if (token2 && options.auth) {
         throw new Error("Parameters token and opts.auth may not both be specified");
       }
-      return typeof options.auth === "string" ? options.auth : `token ${token}`;
+      return typeof options.auth === "string" ? options.auth : `token ${token2}`;
     }
     exports2.getAuthString = getAuthString;
     function getProxyAgent(destinationUrl) {
@@ -21036,43 +21036,43 @@ var require_dist_node7 = __commonJS({
     var REGEX_IS_INSTALLATION_LEGACY = /^v1\./;
     var REGEX_IS_INSTALLATION = /^ghs_/;
     var REGEX_IS_USER_TO_SERVER = /^ghu_/;
-    async function auth(token) {
-      const isApp = token.split(/\./).length === 3;
-      const isInstallation = REGEX_IS_INSTALLATION_LEGACY.test(token) || REGEX_IS_INSTALLATION.test(token);
-      const isUserToServer = REGEX_IS_USER_TO_SERVER.test(token);
+    async function auth(token2) {
+      const isApp = token2.split(/\./).length === 3;
+      const isInstallation = REGEX_IS_INSTALLATION_LEGACY.test(token2) || REGEX_IS_INSTALLATION.test(token2);
+      const isUserToServer = REGEX_IS_USER_TO_SERVER.test(token2);
       const tokenType = isApp ? "app" : isInstallation ? "installation" : isUserToServer ? "user-to-server" : "oauth";
       return {
         type: "token",
-        token,
+        token: token2,
         tokenType
       };
     }
-    function withAuthorizationPrefix(token) {
-      if (token.split(/\./).length === 3) {
-        return `bearer ${token}`;
+    function withAuthorizationPrefix(token2) {
+      if (token2.split(/\./).length === 3) {
+        return `bearer ${token2}`;
       }
-      return `token ${token}`;
+      return `token ${token2}`;
     }
-    async function hook(token, request, route, parameters) {
+    async function hook(token2, request, route, parameters) {
       const endpoint = request.endpoint.merge(
         route,
         parameters
       );
-      endpoint.headers.authorization = withAuthorizationPrefix(token);
+      endpoint.headers.authorization = withAuthorizationPrefix(token2);
       return request(endpoint);
     }
-    var createTokenAuth = function createTokenAuth2(token) {
-      if (!token) {
+    var createTokenAuth = function createTokenAuth2(token2) {
+      if (!token2) {
         throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
       }
-      if (typeof token !== "string") {
+      if (typeof token2 !== "string") {
         throw new Error(
           "[@octokit/auth-token] Token passed to createTokenAuth is not a string"
         );
       }
-      token = token.replace(/^(token|bearer) +/i, "");
-      return Object.assign(auth.bind(null, token), {
-        hook: hook.bind(null, token)
+      token2 = token2.replace(/^(token|bearer) +/i, "");
+      return Object.assign(auth.bind(null, token2), {
+        hook: hook.bind(null, token2)
       });
     };
   }
@@ -23820,9 +23820,9 @@ var require_utils4 = __commonJS({
       }
     };
     exports2.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(exports2.defaults);
-    function getOctokitOptions(token, options) {
+    function getOctokitOptions(token2, options) {
       const opts = Object.assign({}, options || {});
-      const auth = Utils.getAuthString(token, opts);
+      const auth = Utils.getAuthString(token2, opts);
       if (auth) {
         opts.auth = auth;
       }
@@ -23868,9 +23868,9 @@ var require_github = __commonJS({
     var Context = __importStar(require_context());
     var utils_1 = require_utils4();
     exports2.context = new Context.Context();
-    function getOctokit2(token, options, ...additionalPlugins) {
+    function getOctokit2(token2, options, ...additionalPlugins) {
       const GitHubWithPlugins = utils_1.GitHub.plugin(...additionalPlugins);
-      return new GitHubWithPlugins((0, utils_1.getOctokitOptions)(token, options));
+      return new GitHubWithPlugins((0, utils_1.getOctokitOptions)(token2, options));
     }
     exports2.getOctokit = getOctokit2;
   }
@@ -29742,9 +29742,9 @@ function determineRequestsReferrer(request, { referrerURLCallback, referrerOrigi
 function parseReferrerPolicyFromHeader(headers) {
   const policyTokens = (headers.get("referrer-policy") || "").split(/[,\s]+/);
   let policy = "";
-  for (const token of policyTokens) {
-    if (token && ReferrerPolicy.has(token)) {
-      policy = token;
+  for (const token2 of policyTokens) {
+    if (token2 && ReferrerPolicy.has(token2)) {
+      policy = token2;
     }
   }
   return policy;
@@ -30224,9 +30224,9 @@ async function run() {
     const projectName = core.getInput("cloudflare-project-name");
     let githubToken = core.getInput("github-token");
     if (!githubToken) {
-      githubToken = process.env.GITHUB_TOKEN;
+      githubToken = github.token;
       if (!githubToken) {
-        core.setFailed("No GitHub token provided and secrets.GITHUB_TOKEN is missing from environment.");
+        core.setFailed("No GitHub token provided and github.token is missing from context.");
         return;
       }
     }

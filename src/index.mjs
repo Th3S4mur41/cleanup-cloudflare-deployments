@@ -10,9 +10,9 @@ async function run() {
     const projectName = core.getInput('cloudflare-project-name');
     let githubToken = core.getInput('github-token');
     if (!githubToken) {
-      githubToken = process.env.GITHUB_TOKEN;
+      githubToken = github.token;
       if (!githubToken) {
-        core.setFailed('No GitHub token provided and secrets.GITHUB_TOKEN is missing from environment.');
+        core.setFailed('No GitHub token provided and github.token is missing from context.');
         return;
       }
     }
