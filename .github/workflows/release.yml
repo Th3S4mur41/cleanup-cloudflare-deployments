@@ -1,0 +1,19 @@
+name: Release
+
+on:
+  check_suite:
+    types: completed
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.check_suite.conclusion == 'success' &&
+      (github.event.check_suite.head_branch == 'main' ||
+        github.event.check_suite.head_branch == 'next' ||
+        github.event.check_suite.head_branch == 'beta' ||
+        github.event.check_suite.head_branch == 'alpha')
+
+    steps:
+      - name: Release
+        run: echo "run release"
