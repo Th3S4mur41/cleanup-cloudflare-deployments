@@ -1,6 +1,8 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
 
 async function run() {
   try {
@@ -43,6 +45,11 @@ async function run() {
     const previewDeployments = deployments.filter(d => d.environment === 'preview');
     const productionDeployments = deployments.filter(d => d.environment === 'production');
 
+    // Track deleted and kept deployments for summary
+    let deletedPreviewCount = 0;
+    let deletedProductionCount = 0;
+    let keptDeployments = [];
+
     // Cleanup PREVIEW deployments
     if (cleanupType === 'preview' || cleanupType === 'all') {
       // 1. Delete previews for deleted branches
@@ -51,16 +58,19 @@ async function run() {
         const wouldDelete = branch && !branchNames.has(branch);
         if (dryRun) {
           printDeploymentRow(d, 'preview', branch, wouldDelete ? 'DELETE' : 'KEEP');
+          if (!wouldDelete) keptDeployments.push({ d, env: 'preview', branch });
         } else if (wouldDelete) {
           try {
             await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
             printDeploymentRow(d, 'preview', branch, 'DELETED');
+            deletedPreviewCount++;
           } catch (err) {
             printDeploymentRow(d, 'preview', branch, 'ERROR');
             core.error(`Failed to delete deployment ${d.id}: ${err.message}`);
           }
         } else {
           printDeploymentRow(d, 'preview', branch, 'KEEP');
+          keptDeployments.push({ d, env: 'preview', branch });
         }
       }
       // 2. For existing branches, keep only the N most recent
@@ -78,16 +88,19 @@ async function run() {
           const wouldDelete = idx >= previewKeep;
           if (dryRun) {
             printDeploymentRow(d, 'preview', branch, wouldDelete ? 'DELETE' : 'KEEP');
+            if (!wouldDelete) keptDeployments.push({ d, env: 'preview', branch });
           } else if (wouldDelete) {
             try {
               await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
               printDeploymentRow(d, 'preview', branch, 'DELETED');
+              deletedPreviewCount++;
             } catch (err) {
               printDeploymentRow(d, 'preview', branch, 'ERROR');
               core.error(`Failed to delete deployment ${d.id}: ${err.message}`);
             }
           } else {
             printDeploymentRow(d, 'preview', branch, 'KEEP');
+            keptDeployments.push({ d, env: 'preview', branch });
           }
         }
       }
@@ -101,16 +114,19 @@ async function run() {
         const wouldDelete = idx >= productionKeep;
         if (dryRun) {
           printDeploymentRow(d, 'production', null, wouldDelete ? 'DELETE' : 'KEEP');
+          if (!wouldDelete) keptDeployments.push({ d, env: 'production', branch: null });
         } else if (wouldDelete) {
           try {
             await deleteDeployment({ apiToken, accountId, projectName, id: d.id });
             printDeploymentRow(d, 'production', null, 'DELETED');
+            deletedProductionCount++;
           } catch (err) {
             printDeploymentRow(d, 'production', null, 'ERROR');
             core.error(`Failed to delete deployment ${d.id}: ${err.message}`);
           }
         } else {
           printDeploymentRow(d, 'production', null, 'KEEP');
+          keptDeployments.push({ d, env: 'production', branch: null });
         }
       }
     }
@@ -120,6 +136,9 @@ async function run() {
     } else {
       core.info('Cleanup complete!');
     }
+
+    // Write workflow summary
+    await writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments });
   } catch (err) {
     core.setFailed(err.message);
   }
@@ -167,6 +186,33 @@ function printDeploymentRow(d, env, branch, status) {
   const branchStr = (branch || '').padEnd(20);
   const created = new Date(d.created_on).toISOString().slice(0, 19).replace('T', ' ');
   core.info(`${id}  ${envStr}  ${branchStr}  ${created}  ${status}`);
+}
+
+// Helper: write workflow summary
+async function writeWorkflowSummary({ deletedPreviewCount, deletedProductionCount, keptDeployments }) {
+  let summary = '';
+  if (deletedProductionCount > 0) {
+    summary += `- Deleted **${deletedProductionCount}** production deployment(s)\n`;
+  }
+  if (deletedPreviewCount > 0) {
+    summary += `- Deleted **${deletedPreviewCount}** preview deployment(s)\n`;
+  }
+  if (keptDeployments.length > 0) {
+    summary += '\n### Kept Deployments\n';
+    summary += '| ID | Environment | Branch | Created | Status |\n';
+    summary += '| --- | --- | --- | --- | --- |\n';
+    for (const { d, env, branch } of keptDeployments) {
+      const id = d.id;
+      const created = new Date(d.created_on).toISOString().slice(0, 19).replace('T', ' ');
+      summary += `| ${id} | ${env} | ${branch || ''} | ${created} | KEEP |\n`;
+    }
+  }
+  // Write to GitHub Actions summary if available
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+  } else {
+    core.info('\n--- Workflow Summary ---\n' + summary);
+  }
 }
 
 run();
