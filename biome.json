@@ -1,14 +1,22 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-	"organizeImports": {
-		"enabled": true
-	},
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"nursery": {
-				"all": true,
+			"nursery": {},
+			"style": {
+				"noParameterAssign": "error",
+				"useAsConstAssertion": "error",
+				"useDefaultParameterLast": "error",
+				"useEnumInitializers": "error",
+				"useSelfClosingElements": "error",
+				"useSingleVarDeclarator": "error",
+				"noUnusedTemplateLiteral": "error",
+				"useNumberNamespace": "error",
+				"noInferrableTypes": "error",
+				"noUselessElse": "error",
 				"noProcessEnv": "off"
 			}
 		}
@@ -23,7 +31,7 @@
 		}
 	},
 	"files": {
-		"ignore": [".devcontainer", "dist"]
+		"includes": ["**", "!**/.devcontainer", "!**/dist"]
 	},
 	"vcs": {
 		"enabled": true,
