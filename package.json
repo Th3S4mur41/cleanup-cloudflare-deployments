@@ -1,7 +1,17 @@
 {
 	"name": "cleanup-cloudflare-deployments",
 	"description": "Delete old Cloudflare deployments according to settings.",
-	"keywords": ["Actions", "GitHub", "Cloudflare", "Cleanup", "Deployments", "Pages", "Delete", "Remove", "Purge"],
+	"keywords": [
+		"Actions",
+		"GitHub",
+		"Cloudflare",
+		"Cleanup",
+		"Deployments",
+		"Pages",
+		"Delete",
+		"Remove",
+		"Purge"
+	],
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Th3S4mur41/cleanup-cloudflare-deployments.git"
@@ -34,11 +44,25 @@
 		"release": "semantic-release"
 	},
 	"commitlint": {
-		"extends": ["@commitlint/config-conventional"],
+		"extends": [
+			"@commitlint/config-conventional"
+		],
 		"rules": {
-			"body-max-line-length": [1, "always", 140],
-			"footer-max-line-length": [2, "always", 140],
-			"header-max-length": [2, "always", 140]
+			"body-max-line-length": [
+				1,
+				"always",
+				140
+			],
+			"footer-max-line-length": [
+				2,
+				"always",
+				140
+			],
+			"header-max-length": [
+				2,
+				"always",
+				140
+			]
 		}
 	}
 }
