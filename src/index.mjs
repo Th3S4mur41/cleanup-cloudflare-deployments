@@ -74,7 +74,6 @@ async function run() {
 			}
 			// 2. For existing branches, keep only the N most recent
 			const previewsByBranch = {};
-			// biome-ignore lint/complexity/noForEach: Using forEach for async operations
 			previewDeployments.forEach((d) => {
 				const branch = d.deployment_trigger?.metadata?.branch;
 				if (!branch) return;
