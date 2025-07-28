@@ -27,7 +27,7 @@
 	"devDependencies": {
 		"@actions/core": "^1.11.1",
 		"@actions/github": "^6.0.1",
-		"@biomejs/biome": "^2.0.6",
+		"@biomejs/biome": "^2.1.2",
 		"@commitlint/cli": "^19.8.1",
 		"@commitlint/config-conventional": "^19.8.1",
 		"esbuild": "^0.25.5",
