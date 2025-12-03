@@ -31,7 +31,7 @@
 		"@commitlint/cli": "^20.1.0",
 		"@commitlint/config-conventional": "^20.0.0",
 		"esbuild": "^0.27.0",
-		"lefthook": "^2.0.5",
+		"lefthook": "^2.0.7",
 		"node-fetch": "^3.3.2",
 		"semantic-release": "^25.0.2",
 		"semantic-release-major-tag": "^0.3.2"
