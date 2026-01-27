@@ -25,7 +25,7 @@
 	},
 	"type": "module",
 	"devDependencies": {
-		"@actions/core": "^2.0.2",
+		"@actions/core": "^2.0.3",
 		"@actions/github": "^8.0.0",
 		"@biomejs/biome": "^2.3.13",
 		"@commitlint/cli": "^20.3.1",
