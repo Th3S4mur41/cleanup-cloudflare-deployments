@@ -29,7 +29,7 @@
 		"@actions/github": "^9.1.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.14",
+		"@biomejs/biome": "^2.4.15",
 		"@commitlint/cli": "^20.5.3",
 		"@commitlint/config-conventional": "^20.5.3",
 		"esbuild": "^0.28.0",
