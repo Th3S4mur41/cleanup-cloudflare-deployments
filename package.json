@@ -32,7 +32,7 @@
 		"@biomejs/biome": "^2.4.16",
 		"@commitlint/cli": "^21.0.2",
 		"@commitlint/config-conventional": "^21.0.2",
-		"esbuild": "^0.28.0",
+		"esbuild": "^0.28.1",
 		"lefthook": "^2.1.9",
 		"node-fetch": "^3.3.2",
 		"semantic-release": "^25.0.5",
