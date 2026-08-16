@@ -30,7 +30,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.7",
-		"@commitlint/cli": "^21.2.1",
+		"@commitlint/cli": "^21.2.2",
 		"@commitlint/config-conventional": "^21.0.2",
 		"esbuild": "^0.28.2",
 		"lefthook": "^2.1.10",
