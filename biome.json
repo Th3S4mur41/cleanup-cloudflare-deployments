@@ -4,7 +4,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"nursery": {},
 			"style": {
 				"noParameterAssign": "error",
@@ -26,8 +26,18 @@
 		"lineWidth": 120
 	},
 	"javascript": {
+		"experimentalEmbeddedSnippetsEnabled": false,
 		"formatter": {
 			"quoteStyle": "single"
+		}
+	},
+	"markdown": {
+		"analyzeEmbeds": true,
+		"formatter": {
+			"formatEmbeds": true
+		},
+		"parser": {
+			"frontmatter": true
 		}
 	},
 	"files": {
