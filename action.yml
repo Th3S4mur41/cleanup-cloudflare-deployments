@@ -3,8 +3,8 @@ description: Delete old Cloudflare deployments according to settings.
 author: Th3S4mur41
 
 branding:
-  icon: 'trash-2'
-  color: 'orange'
+  icon: "trash-2"
+  color: "orange"
 
 inputs:
   cloudflare-api-token:
@@ -26,15 +26,15 @@ inputs:
   preview-keep:
     required: false
     description: Number of preview deployments to keep per branch
-    default: '1'
+    default: "1"
   production-keep:
     required: false
     description: Number of production deployments to keep
-    default: '1'
+    default: "1"
   dry-run:
     required: false
-    description: 'If true, only list deployments and whether they would be deleted.'
-    default: 'false'
+    description: "If true, only list deployments and whether they would be deleted."
+    default: "false"
 runs:
   using: node24
   main: dist/index.mjs

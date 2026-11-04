@@ -7,8 +7,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      time: '00:00'
-      timezone: 'Europe/Berlin'
+      time: "00:00"
+      timezone: "Europe/Berlin"
     groups:
       commitlint:
         patterns:
@@ -17,10 +17,10 @@ updates:
         patterns:
           - "semantic-release"
           - "semantic-release-*"
-          
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-      time: '00:00'
-      timezone: 'Europe/Berlin'
+      time: "00:00"
+      timezone: "Europe/Berlin"

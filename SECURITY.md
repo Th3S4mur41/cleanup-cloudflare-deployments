@@ -21,5 +21,6 @@ Please do **not** disclose security issues publicly until they have been reviewe
 We aim to respond to security reports within 3 business days. Once a vulnerability is confirmed, we will work to release a fix as soon as possible and credit the reporter if desired.
 
 ## Additional Resources
+
 - [GitHub Security Advisories](https://docs.github.com/en/code-security/security-advisories/repository-advisories/about-repository-security-advisories)
 - [Responsible Disclosure Policy](https://docs.github.com/en/code-security/getting-started/adding-a-security-policy-to-your-repository)
